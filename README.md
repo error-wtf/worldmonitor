@@ -6,6 +6,7 @@
 > - `deployment/adsblol-sbs-bridge-v7.py` — multi-source ADS-B → SBS bridge: 16-center 250 NM raster across two aggregators (public APIs now reject radius > 250 NM with HTTP 403)
 > - `deployment/setup-native.py` — native (non-Docker) installer: generates all credentials at runtime, systemd-hardened units, fail-closed nginx integration
 > - `docs/EXIT-SELFHOST-FIXES-2026-11-15.md` — measured verification: 449/489 receiver routes HTTP 200, ~3,000+ aircraft per cycle
+> - **Map stack** — full map modes `2D` flat, `3D` CII globe and `God's-Eye` photoreal 3D (GEV), plus embedded sub-maps: Windy, weather radar, WebSDR receiver map, unrest and sporen embeds
 > - [Releases](https://github.com/error-wtf/worldmonitor/releases/tag/worldmap-apks-v1.6) — companion Android WebView app (WorldMap v1.0 – v1.6-final)
 >
 > Everything below this banner is upstream World Monitor (AGPL v3). This fork is not the official site.
