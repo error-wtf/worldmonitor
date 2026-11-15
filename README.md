@@ -1,3 +1,15 @@
+> ### 🔱 EXIT fork — self-host hardening fork
+>
+> This fork of [koala73/worldmonitor](https://github.com/koala73/worldmonitor) adds the EXIT self-host layer on top of upstream. What this tree contains beyond upstream:
+>
+> - `deployment/sdr-proxy.mjs` — WebSDR receiver proxy for a 489-receiver public catalog: TLS-tolerant page fetch, allowlist anti-redirect guard, per-receiver cookie routing
+> - `deployment/adsblol-sbs-bridge-v7.py` — multi-source ADS-B → SBS bridge: 16-center 250 NM raster across two aggregators (public APIs now reject radius > 250 NM with HTTP 403)
+> - `deployment/setup-native.py` — native (non-Docker) installer: generates all credentials at runtime, systemd-hardened units, fail-closed nginx integration
+> - `docs/EXIT-SELFHOST-FIXES-2026-11-15.md` — measured verification: 449/489 receiver routes HTTP 200, ~3,000+ aircraft per cycle
+> - [Releases](https://github.com/error-wtf/worldmonitor/releases/tag/worldmap-apks-v1.6) — companion Android WebView app (WorldMap v1.0 – v1.6-final)
+>
+> Everything below this banner is upstream World Monitor (AGPL v3). This fork is not the official site.
+
 # World Monitor
 
 [简体中文](README.zh-CN.md) | [日本語](README.ja-JP.md) | [Русский](README.ru.md)
