@@ -414,7 +414,7 @@ const LLM_PROVIDERS = [
     name: 'ollama',
     envKey: 'OLLAMA_API_URL',
     apiUrlFn: (baseUrl) => new URL('/v1/chat/completions', baseUrl).toString(),
-    model: () => process.env.OLLAMA_MODEL_INSIGHTS || process.env.OLLAMA_MODEL || 'llama3.1:8b',  // BINGSI 15.11.26: dedizierter Insights-Override (qwen3:4b) ohne Einfluss auf andere Ollama-Konsumenten
+    model: () => (process.env.OLLAMA_MODEL_INSIGHTS === 'none' ? 'none' : (process.env.OLLAMA_MODEL_INSIGHTS || process.env.OLLAMA_MODEL || 'llama3.1:8b')),  // BINGSI 15.11.26: 'none' = Ollama-Leg ueberspringen (Insights laufen direkt ueber die z.ai-Leg); ohne Override gilt OLLAMA_MODEL
     headers: (_key) => {
       const h = { 'Content-Type': 'application/json', 'User-Agent': CHROME_UA };
       const apiKey = process.env.OLLAMA_API_KEY;
@@ -575,6 +575,7 @@ async function callLLM(headline, options = {}) {
 
     const apiUrl = provider.apiUrlFn ? provider.apiUrlFn(envVal) : provider.apiUrl;
     const model = typeof provider.model === 'function' ? provider.model() : provider.model;
+    if (model === 'none') continue;  // BINGSI 15.11.26: 'none' skippt die Leg (siehe OLLAMA_MODEL_INSIGHTS)
     // Captured per attempt, BEFORE the request: a correction collected during
     // this attempt's rejection belongs to the NEXT request. The request body
     // and the telemetry both derive from this one variable, so the recorded
