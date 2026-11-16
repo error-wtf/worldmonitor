@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXIT MATRIX · System Status</title>
+<style>
+:root{
+  --bg:#ffffff; --bg-band:#1450f0; --card:#f7f9fa; --card-border:#e6ebef;
+  --text:#1a1f25; --muted:#6b7784; --ok:#2ea44f; --warn:#e8b100; --bad:#d43f3f; --info:#1450f0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.band{background:var(--bg-band);color:#fff;padding:64px 20px 48px;text-align:center}
+.band h1{font-size:34px;font-weight:700;letter-spacing:-.5px}
+.band h1 span{font-weight:300}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px 80px}
+.overall{margin:-32px auto 28px;max-width:720px;background:#fff;border:1px solid var(--card-border);border-radius:10px;padding:18px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);position:relative}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}.dot.info{background:var(--info)}
+.overall b{font-size:17px}
+.overall small{color:var(--muted);margin-left:auto}
+section.incidents{margin-top:8px}
+.incident{border:1px solid var(--card-border);border-radius:8px;overflow:hidden;margin-bottom:22px}
+.incident .head{padding:12px 18px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.incident .head .sev{font-size:13px;font-weight:500;color:rgba(255,255,255,.85)}
+.incident.info .head{background:var(--info);color:#fff}
+.incident.warn .head{background:var(--warn);color:#1a1f25}
+.incident.bad .head{background:var(--bad);color:#fff}
+.incident.ok .head{background:var(--ok);color:#fff}
+.incident .body{padding:16px 18px;background:#fff}
+.incident .body p{margin-bottom:8px}
+.incident .body .meta{color:var(--muted);font-size:13px;margin-top:4px}
+h2.sec{font-size:20px;margin:40px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--card-border)}
+table{width:100%;border-collapse:collapse}
+td{padding:10px 6px;border-bottom:1px solid var(--card-border);vertical-align:top}
+td:last-child{text-align:right;white-space:nowrap}
+.tag{display:inline-block;font-size:12.5px;font-weight:600;border-radius:20px;padding:2px 12px}
+.tag.operational{color:var(--ok);background:#e6f4ea}
+.tag.degraded{color:#8a6d00;background:#fdf6d8}
+.tag.down{color:var(--bad);background:#fdeaea}
+.tag.unspecified{color:var(--muted);background:#eef1f3}
+.tag.inactive{color:var(--muted);background:#eef1f3}
+.tag.activating{color:#8a6d00;background:#fdf6d8}
+.tag.failed{color:var(--bad);background:#fdeaea}
+.tag.active{color:var(--ok);background:#e6f4ea}
+footer{max-width:760px;margin:0 auto;padding:0 20px 60px;color:var(--muted);font-size:13.5px}
+footer a{color:var(--info);text-decoration:none}
+.ts{color:var(--muted);font-size:12.5px;text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="band"><h1>exit matrix <span>STATUS</span></h1></div>
+
+<div class="overall" id="overall"><span class="dot ok"></span><b id="overall-text">Lade Status …</b><small id="overall-ts"></small></div>
+
+<div class="wrap">
+  <section class="incidents" id="incidents"></section>
+
+  <h2 class="sec">Externe Dienste &amp; Datenquellen</h2>
+  <table id="ext"></table>
+
+  <h2 class="sec">Lokale WorldMonitor-Dienste</h2>
+  <table id="local"></table>
+
+  <p class="ts" id="generated"></p>
+</div>
+
+<footer>
+  Automatisch generierte Statusseite der exit-matrix.net WorldMonitor-Instanz.
+  <a href="/worldmapp/">← Zur Weltkarte</a> · <a href="/worldmapp/status.html">Datenquellen &amp; Betrieb</a>
+</footer>
+
+<script>
+const SEV_LABEL = {operational:'Operational', degraded:'Degraded', down:'Outage', unspecified:'Unknown', active:'Aktiv', inactive:'Inaktiv', activating:'Startet', failed:'Fehler'};
+function esc(s){const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML;}
+
+function classifyLocal(active){
+  if(active==='active')return 'ok';
+  if(active==='activating')return 'warn';
+  if(active==='failed')return 'bad';
+  return null;
+}
+
+async function load(){
+  let ext=[], local={services:[],generatedAt:0};
+  try{ const r=await fetch('/api/infrastructure/v1/list-service-statuses'); ext=(await r.json()).statuses||[];}catch(e){}
+  try{ const r=await fetch('/worldmapp/local-health.json'); local=await r.json();}catch(e){}
+
+  // ---- overall banner ----
+  const badExt=ext.filter(s=>s.status==='SERVICE_OPERATIONAL_STATUS_DOWN'||/outage|major/i.test(s.description||''));
+  const degExt=ext.filter(s=>s.status==='SERVICE_OPERATIONAL_STATUS_DEGRADED');
+  const failed=(local.services||[]).filter(s=>s.active==='failed');
+  const activating=(local.services||[]).filter(s=>s.active==='activating');
+  const dotEl=document.querySelector('#overall .dot');
+  const txt=document.getElementById('overall-text');
+  if(badExt.length||failed.length){
+    dotEl.className='dot bad';
+    txt.textContent='Teilweise Störung';
+  }else if(degExt.length||activating.length){
+    dotEl.className='dot warn';
+    txt.textContent='Beeinträchtigte Leistung';
+  }else{
+    dotEl.className='dot ok';
+    txt.textContent='Alle Systeme betriebsbereit';
+  }
+  document.getElementById('overall-ts').textContent = local.generatedAt? 'Stand: '+new Date(local.generatedAt*1000).toLocaleString('de-DE'):'';
+
+  // ---- incidents (degraded/outaged external + failed local) ----
+  const inc=document.getElementById('incidents');
+  let html='';
+  for(const s of Object.values(Object.fromEntries(badExt.concat(degExt).map(x=>[x.id,x])))){
+    const cls = s.status==='SERVICE_OPERATIONAL_STATUS_DOWN'?'bad':'warn';
+    const sev = s.status==='SERVICE_OPERATIONAL_STATUS_DOWN'?'Investigating':'Investigating';
+    html+=`<article class="incident ${cls}"><div class="head">${esc(s.name)}<span class="sev">${sev}</span></div>
+    <div class="body"><p><b>${sev}</b> — ${esc(s.description||'Dienst meldet Beeinträchtigung')}.</p>
+    <p class="meta">Diese Seite (exit-matrix.net) ist davon nicht betroffen. Geprüft: ${new Date(s.checkedAt).toLocaleString('de-DE')} · Latenz ${s.latencyMs??'?'} ms</p></div></article>`;
+  }
+  for(const s of failed){
+    html+=`<article class="incident bad"><div class="head">${esc(s.unit)}<span class="sev">Failed</span></div>
+    <div class="body"><p><b>Fehler</b> — lokaler Sammlerdienst meldet „failed“. Daten für diesen Feed können veraltet sein.</p>
+    <p class="meta">Seit ${esc(s.since||'unbekannt')} · Details im Server-Journal</p></div></article>`;
+  }
+  if(!html) html='<article class="incident ok"><div class="head">Keine offenen Störungen<span class="sev">Resolved</span></div><div class="body"><p>Aktuell sind keine Vorfälle bekannt. Alle überwachten Dienste arbeiten im Normalbetrieb.</p></div></article>';
+  inc.innerHTML=html;
+
+  // ---- external table ----
+  const order={SERVICE_OPERATIONAL_STATUS_OPERATIONAL:0,SERVICE_OPERATIONAL_STATUS_UNSPECIFIED:2,SERVICE_OPERATIONAL_STATUS_DEGRADED:1,SERVICE_OPERATIONAL_STATUS_DOWN:1};
+  ext.sort((a,b)=>(order[a.status]??3)-(order[b.status]??3)||a.name.localeCompare(b.name));
+  document.getElementById('ext').innerHTML=ext.map(s=>{
+    let key='unspecified';
+    if(s.status==='SERVICE_OPERATIONAL_STATUS_OPERATIONAL')key='operational';
+    else if(s.status==='SERVICE_OPERATIONAL_STATUS_DEGRADED')key='degraded';
+    else if(/DOWN|OUTAGE/i.test(s.status))key='down';
+    return `<tr><td>${esc(s.name)}</td><td><span class="tag ${key}">${SEV_LABEL[key]}</span></td></tr>`;
+  }).join('');
+
+  // ---- local table ----
+  const sv=(local.services||[]).slice().sort((a,b)=>a.unit.localeCompare(b.unit));
+  document.getElementById('local').innerHTML=sv.map(s=>{
+    const k=s.active||'unknown';
+    const tagKey=['active','failed','activating'].includes(k)?k:'inactive';
+    return `<tr><td>${esc(s.unit.replace('worldmonitor-','').replace('.service',''))}<br><small style="color:var(--muted)">${esc(s.unit)}</small></td><td><span class="tag ${tagKey}">${SEV_LABEL[tagKey]||esc(k)}</span></td></tr>`;
+  }).join('');
+
+  document.getElementById('generated').textContent='Automatisch aktualisiert · externe Dienste: ca. 15 Min · lokale Dienste: alle 5 Min';
+}
+load();
+setInterval(load,300000);
+</script>
+</body>
+</html>

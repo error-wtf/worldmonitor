@@ -1,0 +1,18 @@
+#exit-companion-button{position:fixed;right:16px;bottom:16px;z-index:1200;border:1px solid #60dcb4;background:#10241f;color:#bdffe8;border-radius:8px;padding:10px 15px;font:13px system-ui;cursor:pointer;box-shadow:0 3px 16px #0008}
+#exit-companion{padding:0;border:1px solid #4b6e64;border-radius:10px;background:#0d161f;width:min(560px,96vw);height:min(920px,94dvh);max-height:94dvh;min-width:320px;min-height:240px;resize:both;color:#d7e2e8;overflow:hidden}
+#exit-companion::backdrop{background:#0007}#exit-companion iframe{display:block;border:0;width:100%;height:calc(100% - 40px)}#exit-companion-close{display:block;margin-left:auto;height:40px;background:transparent;color:#d7e2e8;border:0;padding:8px 16px;cursor:pointer;font:14px system-ui}
+
+/* Keep the upstream community hint clear of the companion control. */
+.community-widget{bottom:68px!important}
+#exit-companion-button{position:fixed;right:16px;bottom:16px;z-index:1200;border:1px solid #60dcb4;background:#10241f;color:#bdffe8;border-radius:8px;padding:10px 15px;font:13px system-ui;cursor:pointer;box-shadow:0 3px 16px #0008}
+#exit-companion{padding:0;border:1px solid #4b6e64;border-radius:10px;background:#0d161f;width:min(560px,96vw);height:min(920px,94dvh);max-height:94dvh;min-width:320px;min-height:240px;resize:both;color:#d7e2e8;overflow:hidden}
+#exit-companion::backdrop{background:#0007}#exit-companion iframe{display:block;border:0;width:100%;height:calc(100% - 40px)}#exit-companion-close{display:block;margin-left:auto;height:40px;background:transparent;color:#d7e2e8;border:0;padding:8px 16px;cursor:pointer;font:14px system-ui}
+
+/* Keep the upstream community hint clear of the companion control. */
+.community-widget{bottom:68px!important}
+
+
+/* R4: Embed-iframes bleiben UNTER der Karten-Toolbar */
+iframe[id^="wm-"][id$="-embed"] {
+  z-index: 2147482900 !important;
+}

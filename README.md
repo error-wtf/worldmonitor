@@ -5,9 +5,10 @@
 > - `deployment/sdr-proxy.mjs` — WebSDR receiver proxy for a 489-receiver public catalog: TLS-tolerant page fetch, allowlist anti-redirect guard, per-receiver cookie routing
 > - `deployment/adsblol-sbs-bridge-v7.py` — multi-source ADS-B → SBS bridge: 16-center 250 NM raster across two aggregators (public APIs now reject radius > 250 NM with HTTP 403)
 > - `deployment/setup-native.py` — native (non-Docker) installer: generates all credentials at runtime, systemd-hardened units, fail-closed nginx integration
-> - `docs/EXIT-SELFHOST-FIXES-2026-11-15.md` — measured verification: 449/489 receiver routes HTTP 200, ~3,000+ aircraft per cycle
+> - `deployment/exit-api.mjs` + `deployment/overlay/` — the live frontend runtime: regional API service (SDR receiver page routes, TV proxy, webcam tiles) and 49 `wm-*.js` map-mode/panel overlays plus EXIT chrome (`exit.js/css`, status pages). The dashboard does not reproduce without these — they are runtime files, not build output
+> - `docs/EXIT-SELFHOST-FIXES-2026-11-15.md` and `docs/EXIT-SELFHOST-FIXES-2026-11-16.md` — measured verification (449/489 receiver routes, bridge behavior, overlay runtime, relict fixes)
 > - **Map stack** — full map modes `2D` flat, `3D` CII globe and `God's-Eye` photoreal 3D (GEV), plus embedded sub-maps: Windy, weather radar, WebSDR receiver map, unrest and sporen embeds
-> - [Releases](https://github.com/error-wtf/worldmonitor/releases/tag/worldmap-apks-v1.6) — companion Android WebView app (WorldMap v1.0 – v1.6-final)
+> - [Releases](https://github.com/error-wtf/worldmonitor/releases/tag/worldmap-apks-v1.6) — companion Android WebView app (WorldMap v1.0 – v1.7, latest asset per release listing)
 >
 > Everything below this banner is upstream World Monitor (AGPL v3). This fork is not the official site.
 
