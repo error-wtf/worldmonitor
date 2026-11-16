@@ -1700,7 +1700,7 @@ document.addEventListener('keydown', function (ev) {
 // z7; darunter liefert rainviewer genau diesen 1,4KB-platzhalter). Der
 // RUNTIME-layer (rain-layer.js) hat maxzoom:7 — der NATIVE bundle-layer
 // (deck-stack fetchAndApplyRadar) baute {z}-urls OHNE clamp → placeholders
-// bei karten-zoom > 7 (bewiesen: linos belarus-view z9-11, zwei kacheln).
+// bei karten-zoom > 7 (bewiesen: operators belarus-view z9-11, zwei kacheln).
 // FIX: jede raster-source mit rainviewer-tiles ohne maxzoom<8 wird mit
 // maxzoom:7 neu angelegt; abhaengige raster-layer mit ihren original-paint/
 // layout-props wieder angehaengt. Das radar bleibt voll sichtbar — maplibre
